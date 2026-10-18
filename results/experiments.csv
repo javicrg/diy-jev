@@ -1,0 +1,8 @@
+experiment,dataset,accuracy
+original_qwen3_0.6b,CommonsenseQA official validation (1221),49.06%
+lora_100,CommonsenseQA official validation (1221),55.04%
+lora_1000,CommonsenseQA official validation (1221),58.97%
+lora_1000_gradient_accumulation,CommonsenseQA official validation (1221),58.07%
+lora_1000_multiple_epochs,CommonsenseQA official validation (1221),60.20%
+lora_1000_learning_rate_schedule,CommonsenseQA official validation (1221),61.59%
+lora_8341_final,CommonsenseQA official validation (1221),67.90%

@@ -1,0 +1,18 @@
+{
+  "model": "Qwen/Qwen3-0.6B",
+  "adapter": "lora_adapter_8341_best",
+  "temperature": 2.090498685836792,
+  "confidence_threshold": 0.70,
+  "dataset": "600-question held-out partition of tau/commonsense_qa training split",
+  "baseline": {"accuracy": 0.4933, "average_confidence": 0.9200, "nll": 3.7584, "ece": 0.4294},
+  "fine_tuned": {"accuracy": 0.6517, "average_confidence": 0.8260, "nll": 1.1344, "ece": 0.1743},
+  "calibrated": {"accuracy": 0.6517, "average_confidence": 0.6507, "nll": 0.9160, "ece": 0.0391},
+  "selective_prediction": {
+    "answered": 260,
+    "abstained": 340,
+    "coverage": 0.4333,
+    "selective_accuracy": 0.8269,
+    "correct_answered": 215,
+    "incorrect_answered": 45
+  }
+}
