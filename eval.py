@@ -1,22 +1,10 @@
-from datasets import load_dataset
+"""Compatibility entry point for the official CommonsenseQA validation set."""
 
-dataset = load_dataset(
-    "tau/commonsense_qa",
-    split="validation"
-)
+import sys
+from pathlib import Path
 
-# dataset = dataset.select(range(100))
+sys.path.insert(0, str(Path(__file__).parent / "src"))
 
-questions = []
+from diy_jev.datasets import load_official_validation
 
-for item in dataset:
-    options = dict(zip(
-        item["choices"]["label"],
-        item["choices"]["text"]
-    ))
-
-    questions.append({
-        "question": item["question"],
-        "options": options,
-        "correct": item["answerKey"]
-    })
+questions = load_official_validation() if __name__ == "__main__" else []
