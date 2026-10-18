@@ -70,12 +70,56 @@ require network access.
 
 ## Usage
 
-Interactive inference loads the model once and asks for one question and five
-options:
+There are two ways to obtain the final adapter before running inference.
+
+### Option 1: download the published adapter
+
+The selected adapter is published as an asset in the
+[v1.0.0 GitHub release](https://github.com/javicrg/diy-jev/releases/tag/v1.0.0).
+From the repository root, download and extract it with:
+
+```bash
+curl -L -o lora_adapter_8341_best.tar.gz \
+  https://github.com/javicrg/diy-jev/releases/download/v1.0.0/lora_adapter_8341_best.tar.gz
+tar -xzf lora_adapter_8341_best.tar.gz
+```
+
+The extracted `lora_adapter_8341_best/` directory must be in the repository
+root. The base Qwen model is downloaded automatically from Hugging Face on
+first use. Then start the interactive interface:
 
 ```bash
 python main.py
 ```
+
+It asks for one question and exactly five answer options:
+
+```text
+Question: Where would you find a coral reef?
+A: Desert
+B: Ocean
+C: Mountain
+D: Forest
+E: Cave
+```
+
+### Option 2: train the adapter yourself
+
+If you do not want to download the published adapter, reproduce the training
+pipeline locally. This is computationally expensive and downloads the base
+model and CommonsenseQA dataset:
+
+```bash
+python train.py
+python calibrate.py
+python fit_temperature.py
+python main.py
+```
+
+`train.py` creates `lora_adapter_8341_best/` and
+`lora_adapter_8341_final/`. The calibration commands then collect logits from
+the best adapter and write `temperature.json`. Do not run these commands just
+to use the already published adapter.
 
 Other entry points are preserved:
 
@@ -94,8 +138,9 @@ Do not run the expensive commands merely to use the existing results.
 dataset partitioning, metrics, calibration, evaluation, and training code.
 Root scripts are thin compatibility entry points. `tests/` contains lightweight
 tests that use synthetic tensors and do not download model weights.
-Measured summaries are in `results/`; the existing root-level calibration
-artifacts and adapters are preserved locally.
+Measured summaries are in `results/`. Model adapters and large calibration
+artifacts are not committed to Git; the final adapter is available from the
+GitHub release above.
 
 ## Limitations and reproducibility
 
@@ -105,8 +150,8 @@ percentage answered. Results use the internal held-out split described above.
 Reproduction depends on Qwen/Qwen3-0.6B, the `tau/commonsense_qa` dataset,
 seed 42, the saved adapter name, prompt `PROMPT_2`, the exact split boundaries,
 and the recorded training configuration. Model and dataset licenses and usage
-conditions should be reviewed before redistribution. This repository does not
-add a license because no license decision has been made.
+conditions should be reviewed before redistribution. The project source is
+released under the MIT License; see `LICENSE`.
 
 ## Acknowledgements
 
