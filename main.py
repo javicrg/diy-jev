@@ -1,7 +1,10 @@
 import torch
+import torch.nn.functional as F
 from tqdm import tqdm
 from transformers import AutoTokenizer, AutoModelForCausalLM
 from eval import questions
+from peft import PeftModel
+import json
 
 MODEL_NAME = "Qwen/Qwen3-0.6B"
 
@@ -24,7 +27,9 @@ print(f"Model loaded on: {device}")
 def predict(
     question: str,
     options: dict[str, str],
-    system_prompt: str
+    system_prompt: str,
+    temperature: float = 1.0,
+    return_logits: bool = False
 ) -> dict[str, float]:
     
     # Construct the question
@@ -75,13 +80,46 @@ def predict(
         logits[ids[0]] for ids in answer_ids
     ])
 
+    if return_logits:
+        return answer_logits.detach().float().cpu()
+
+    # Ensure tempterature is valid
+    if temperature <= 0:
+        raise ValueError("Temperature must be greater than 0.")
+
     # Convert logits to scores
-    probabilities = torch.softmax(answer_logits.float(), dim=0)
+    probabilities = torch.softmax(answer_logits.float() / temperature, dim=0)
 
     # Return results
     return {
         letter: probability.item()
         for letter, probability in zip(options, probabilities)
+    }
+
+def decide(
+    probabilities: dict[str, float],
+    threshold: float = 0.70
+) -> dict:
+
+    if not 0 < threshold <= 1:
+        raise ValueError("Threshold must be between 0 and 1.")
+
+    # Find the answer with the highest probability
+    prediction, confidence = max(
+        probabilities.items(),
+        key=lambda item: item[1]
+    )
+
+    # Decide whether to answer
+    if confidence >= threshold:
+        decision = "ANSWER"
+    else:
+        decision = "ABSTAIN"
+
+    return {
+        "prediction": prediction,
+        "confidence": confidence,
+        "decision": decision
     }
 
 PROMPT_1 = (
@@ -96,7 +134,7 @@ PROMPT_2 = (
     "to the correct answer. No explanations."
 )
 
-def evaluate(dataset, system_prompt):
+def evaluate(dataset, system_prompt, temperature=1.0):
     results = []
 
     for item in tqdm(dataset, desc="Evaluating", unit="question"):
@@ -104,7 +142,8 @@ def evaluate(dataset, system_prompt):
         scores = predict(
             item["question"],
             item["options"],
-            system_prompt
+            system_prompt,
+            temperature=temperature
         )
 
         # Select the answer with the highest score
@@ -148,13 +187,54 @@ def evaluate(dataset, system_prompt):
     else:
         print("High-confidence accuracy: N/A")
 
-
     return accuracy
 
-print("\n========== PROMPT 1 ==========")
 
-accuracy_1 = evaluate(questions, PROMPT_1)
+# Step 14.5 - Evaluate the large-scale fine-tuned model
 
-print("\n========== PROMPT 2 ==========")
+eval_questions = questions
 
-accuracy_2 = evaluate(questions, PROMPT_2)
+model = PeftModel.from_pretrained(
+    model,
+    "./lora_adapter_8341_best"
+).to(device)
+
+model.eval()
+
+# Load our calibrated temperature
+with open("./temperature.json", "r") as f:
+    temperature = json.load(f)["temperature"]
+
+print(f"Using temperature: {temperature:.4f}")
+
+# Select a question from our existing development dataset
+question = questions[0]
+
+options = question["options"]
+
+# Get calibrated probabilities
+probabilities = predict(
+    question=question["question"],
+    options=options,
+    system_prompt=PROMPT_2,
+    temperature=temperature
+)
+
+# Make a decision
+result = decide(
+    probabilities,
+    threshold=0.70
+)
+
+print("\n========== DIY JEV ==========")
+
+print(f"\nQuestion: {question['question']}")
+
+for letter, answer in options.items():
+    print(f"{letter}. {answer}")
+
+print(f"\nPrediction: {result['prediction']}")
+print(f"Confidence: {result['confidence']:.2%}")
+print(f"Decision: {result['decision']}")
+
+print(f"\nCorrect answer: {question['correct']}")
