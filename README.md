@@ -75,12 +75,12 @@ There are two ways to obtain the final adapter before running inference.
 ### Option 1: download the published adapter
 
 The selected adapter is published as an asset in the
-[v1.0.0 GitHub release](https://github.com/javicrg/diy-jev/releases/tag/v1.0.0).
+[v1.0.1 GitHub release](https://github.com/javicrg/diy-jev/releases/tag/v1.0.1).
 From the repository root, download and extract it with:
 
 ```bash
 curl -L -o lora_adapter_8341_best.tar.gz \
-  https://github.com/javicrg/diy-jev/releases/download/v1.0.0/lora_adapter_8341_best.tar.gz
+  https://github.com/javicrg/diy-jev/releases/download/v1.0.1/lora_adapter_8341_best.tar.gz
 tar -xzf lora_adapter_8341_best.tar.gz
 ```
 
