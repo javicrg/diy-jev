@@ -4,7 +4,7 @@ DIY JEV is a confidence-aware multiple-choice decision system. It uses
 Qwen3-0.6B, LoRA fine-tuning, and temperature scaling on CommonsenseQA. For
 each five-choice question it predicts the next token (A–E), calibrates the
 resulting probabilities, and either answers or abstains when confidence is
-below 70%. Confidence is statistical—not a guarantee of correctness.
+below 70%. Confidence is statistical, not a guarantee of correctness.
 
 ## Motivation
 

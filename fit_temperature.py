@@ -42,7 +42,7 @@ def main():
     plt.plot(calibrated_conf, calibrated_acc, marker="o", label=f"After calibration (T={temperature:.2f})")
     plt.xlabel("Average predicted confidence")
     plt.ylabel("Actual accuracy")
-    plt.title("Qwen3-0.6B — Reliability Diagram")
+    plt.title("Qwen3-0.6B: Reliability Diagram")
     plt.xlim(0, 1)
     plt.ylim(0, 1)
     plt.legend()
